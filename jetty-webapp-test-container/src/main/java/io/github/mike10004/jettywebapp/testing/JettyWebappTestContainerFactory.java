@@ -26,6 +26,7 @@ import org.glassfish.jersey.test.spi.TestContainerException;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.glassfish.jersey.test.spi.TestHelper;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
@@ -41,18 +42,38 @@ import java.util.logging.Logger;
  */
 public class JettyWebappTestContainerFactory implements TestContainerFactory {
 
+    @Nullable
+    private final String applicationPath;
+
+    /**
+     * Constructs an instance of the class. If this zero-arg constructor is
+     * used, then an instance of {@link WebappDeploymentContext} must be
+     * passed to {@link #create(URI, DeploymentContext)}.
+     */
+    public JettyWebappTestContainerFactory() {
+        this(null);
+    }
+
+    /**
+     * Constructs an instance of the class.
+     * @param applicationPath application path, if a {@link WebappDeploymentContext} is not passed to {@link #create(URI, DeploymentContext)}
+     */
+    public JettyWebappTestContainerFactory(@Nullable String applicationPath) {
+        this.applicationPath = applicationPath;
+    }
+
     private static class JettyWebappTestContainer implements TestContainer {
 
         private static final Logger LOGGER = Logger.getLogger(JettyWebappTestContainer.class.getName());
 
-        private URI baseUri;
+        private final URI baseUri;
         private final Server server;
 
         /**
          *  @param baseUri
          * @param serverOptions
          */
-        private JettyWebappTestContainer(URI baseUri, WebAppServerCreator.ServerOptionSet serverOptions) throws IOException, URISyntaxException {
+        private JettyWebappTestContainer(URI baseUri, WebappServerConfig serverOptions) throws IOException, URISyntaxException {
             final URI base = UriBuilder.fromUri(baseUri).path(serverOptions.contextPath()).build();
             if (!"/".equals(base.getRawPath())) {
                 throw new TestContainerException(String.format(
@@ -66,7 +87,7 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
                 LOGGER.info("Creating JettyTestContainer configured at the base URI "
                         + TestHelper.zeroPortToAvailablePort(baseUri));
             }
-            this.server = new WebAppServerCreator().createServer(this.baseUri, serverOptions);
+            this.server = new WebappServerCreator().createServer(this.baseUri, serverOptions);
         }
 
         @Override
@@ -97,9 +118,9 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
                             }
                         }
 
-                        baseUri = UriBuilder.fromUri(baseUri).port(port).build();
+                        URI completedBaseUri = UriBuilder.fromUri(this.baseUri).port(port).build();
 
-                        LOGGER.log(Level.INFO, "Started JettyTestContainer at the base URI " + baseUri);
+                        LOGGER.log(Level.INFO, "Started JettyTestContainer at the base URI " + completedBaseUri);
                     }
                 } catch (Exception e) {
                     throw new TestContainerException(e);
@@ -125,7 +146,7 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
     @Override
     public TestContainer create(final URI baseUri, final DeploymentContext context) throws IllegalArgumentException {
         try {
-            return new JettyWebappTestContainer(baseUri, WebappDeploymentContext.wrap(context).getServerOptionSet());
+            return new JettyWebappTestContainer(baseUri, WebappDeploymentContext.wrap(context, applicationPath).getServerConfig());
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException(e);
         }

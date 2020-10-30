@@ -4,7 +4,6 @@ import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.jsp.JettyJspServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
@@ -17,14 +16,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Stream;
 
-class WebAppServerCreator {
+class WebappServerCreator {
 
-    public Server createServer(URI baseUri, ServerOptionSet options) throws URISyntaxException, IOException {
+    public Server createServer(URI baseUri, WebappServerConfig options) throws URISyntaxException, IOException {
 
         Server server = JettyHttpContainerFactory.createServer(baseUri, false);
 
@@ -44,7 +39,7 @@ class WebAppServerCreator {
         servletContextHandler.setResourceBase(webRootResourceUri.toASCIIString());
 
         // Since this is a ServletContextHandler we must manually configure JSP support.
-        enableEmbeddedJspSupport(servletContextHandler, options.jspOptions());
+        enableEmbeddedJspSupport(servletContextHandler, options.jspServletConfig());
 
         options.addServlets(servletContextHandler);
 
@@ -68,7 +63,7 @@ class WebAppServerCreator {
      * @param servletContextHandler the ServletContextHandler to configure
      * @throws IOException if unable to configure
      */
-    private void enableEmbeddedJspSupport(ServletContextHandler servletContextHandler, JspServletOptionSet options) throws IOException {
+    private void enableEmbeddedJspSupport(ServletContextHandler servletContextHandler, JspServletConfig options) throws IOException {
         File scratchDir = options.servletContextTempDir();
         //noinspection ResultOfMethodCallIgnored
         scratchDir.mkdirs();
@@ -94,75 +89,6 @@ class WebAppServerCreator {
         options.pathSpecs().forEach(pathSpec -> {
             servletContextHandler.addServlet(holderJsp, pathSpec);
         });
-    }
-
-    public interface JspServletOptionSet {
-
-        default File servletContextTempDir() {
-            return new File(System.getProperty("java.io.tmpdir"), "servlet-context-tmp");
-        }
-
-        default Map<String, String> initParams() {
-            Map<String, String> jspInitParams = new LinkedHashMap<>();
-            jspInitParams.put("logVerbosityLevel", "DEBUG");
-            jspInitParams.put("fork", "false");
-            jspInitParams.put("xpoweredBy", "false");
-            jspInitParams.put("compilerTargetVM", "1.8");
-            jspInitParams.put("compilerSourceVM", "1.8");
-            jspInitParams.put("keepgenerated", "true");
-            return jspInitParams;
-        }
-
-        default Stream<String> pathSpecs() {
-            return Stream.of("*.jsp");
-        }
-
-    }
-
-    public interface ServerOptionSet {
-
-        default String contextPath() {
-            return "/";
-        }
-
-        default JspServletOptionSet jspOptions() {
-            return new JspServletOptionSet() {};
-        }
-
-        default ServletContextHandler newServletContextHandler() {
-            return new ServletContextHandler(null, null, null, null, null, new ErrorPageErrorHandler(), ServletContextHandler.SESSIONS);
-        }
-
-        default void addServlets(ServletContextHandler context) {
-
-        }
-
-        default Stream<String> configurationClasses() {
-            return Stream.of("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.webapp.WebXmlConfiguration");
-        }
-
-        /**
-         * Gets a URI that specifies a directory that is the resource root.
-         * @return uri
-         */
-        default URI webResourceRootUri() {
-            URL url = getClass().getResource("/WEB-INF/");
-            if (!"file".equals(url.getProtocol())) {
-                throw new IllegalStateException("expect resource root to be a file: URL, but got " + url);
-            }
-            try {
-                File webInfDir = new File(url.toURI());
-                File resourceRootDir = webInfDir.getParentFile(); // not null because in worst case / is parent
-                return resourceRootDir.toURI();
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        default Map<String, String> defaultServletInitParams() {
-            return Collections.emptyMap();
-        }
-
     }
 
     /**
