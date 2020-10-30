@@ -16,31 +16,22 @@
 
 package io.github.mike10004.jettywebapp.testing;
 
-import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.core.UriBuilder;
-
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.Configuration;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.servlet.ServletContainer;
 import org.glassfish.jersey.test.DeploymentContext;
 import org.glassfish.jersey.test.spi.TestContainer;
 import org.glassfish.jersey.test.spi.TestContainerException;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.glassfish.jersey.test.spi.TestHelper;
 
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.glassfish.jersey.uri.UriComponent;
+import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Factory for testing {@link org.glassfish.jersey.jetty.JettyHttpContainer}.
@@ -48,17 +39,21 @@ import org.glassfish.jersey.uri.UriComponent;
  * @author Arul Dhesiaseelan (aruld@acm.org)
  * @author Marek Potociar
  */
-public class JettyTestContainerFactory implements TestContainerFactory {
+public class JettyWebappTestContainerFactory implements TestContainerFactory {
 
-    private static class JettyTestContainer implements TestContainer {
+    private static class JettyWebappTestContainer implements TestContainer {
 
-        private static final Logger LOGGER = Logger.getLogger(JettyTestContainer.class.getName());
+        private static final Logger LOGGER = Logger.getLogger(JettyWebappTestContainer.class.getName());
 
         private URI baseUri;
         private final Server server;
 
-        private JettyTestContainer(final URI baseUri, final DeploymentContext context) {
-            final URI base = UriBuilder.fromUri(baseUri).path(context.getContextPath()).build();
+        /**
+         *  @param baseUri
+         * @param serverOptions
+         */
+        private JettyWebappTestContainer(URI baseUri, WebAppServerCreator.ServerOptionSet serverOptions) throws IOException, URISyntaxException {
+            final URI base = UriBuilder.fromUri(baseUri).path(serverOptions.contextPath()).build();
             if (!"/".equals(base.getRawPath())) {
                 throw new TestContainerException(String.format(
                         "Cannot deploy on %s. Jetty HTTP container only supports deployment on root path.",
@@ -71,32 +66,7 @@ public class JettyTestContainerFactory implements TestContainerFactory {
                 LOGGER.info("Creating JettyTestContainer configured at the base URI "
                         + TestHelper.zeroPortToAvailablePort(baseUri));
             }
-            this.server = createServer(this.baseUri, context.getResourceConfig());
-        }
-
-        private static Server createServer(URI u, ResourceConfig resourceConfig) {
-            if (u == null) {
-                throw new IllegalArgumentException("The URI must not be null");
-            }
-            String path = u.getPath();
-            if (path == null) {
-                throw new IllegalArgumentException("The URI path, of the URI " + u + ", must be non-null");
-            } else if (path.isEmpty()) {
-                throw new IllegalArgumentException("The URI path, of the URI " + u + ", must be present");
-            } else if (path.charAt(0) != '/') {
-                throw new IllegalArgumentException("The URI path, of the URI " + u + ". must start with a '/'");
-            }
-
-            path = String.format("/%s", UriComponent.decodePath(u.getPath(), true).get(1).toString());
-            WebAppContext context = new WebAppContext(null, null, null, null, null, null, ServletContextHandler.SESSIONS);
-            context.setDisplayName("JettyContext");
-            context.setContextPath(path);
-            context.setConfigurations(new Configuration[]{new WebXmlConfiguration()});
-            ServletHolder holder = new ServletHolder(new ServletContainer(resourceConfig));
-            context.addServlet(holder, "/*");
-            Server server = JettyHttpContainerFactory.createServer(u, false);
-            server.setHandler(context);
-            return server;
+            this.server = new WebAppServerCreator().createServer(this.baseUri, serverOptions);
         }
 
         @Override
@@ -154,6 +124,10 @@ public class JettyTestContainerFactory implements TestContainerFactory {
 
     @Override
     public TestContainer create(final URI baseUri, final DeploymentContext context) throws IllegalArgumentException {
-        return new JettyTestContainer(baseUri, context);
+        try {
+            return new JettyWebappTestContainer(baseUri, WebappDeploymentContext.wrap(context).getServerOptionSet());
+        } catch (URISyntaxException | IOException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 }
