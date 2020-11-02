@@ -23,7 +23,7 @@ public interface JspServletConfig {
     }
 
     default Stream<String> pathSpecs() {
-        return Stream.of("*.jsp");
+        return Stream.of("*.jsp", "*.jspf", "*.jspx", "*.xsp", "*.JSP", "*.JSPF", "*.JSPX", "*.XSP");
     }
 
 }
