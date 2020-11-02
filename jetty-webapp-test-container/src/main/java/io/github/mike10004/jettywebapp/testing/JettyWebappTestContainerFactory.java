@@ -66,7 +66,11 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
 
         private static final Logger LOGGER = Logger.getLogger(JettyWebappTestContainer.class.getName());
 
-        private final URI baseUri;
+        /**
+         * Base URI. Not final because if the port is specified as zero, then a port
+         * is selected when the container is started, and the base URI must be updated.
+         */
+        private URI baseUri;
         private final Server server;
 
         /**
@@ -91,6 +95,11 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
             return null;
         }
 
+        /**
+         * Gets the base URI of the application. If this container has not been started,
+         * the URI may not be entirely correct, because the port may not have been selected yet.
+         * @return
+         */
         @Override
         public URI getBaseUri() {
             return baseUri;
@@ -114,9 +123,9 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
                             }
                         }
 
-                        URI completedBaseUri = UriBuilder.fromUri(this.baseUri).port(port).build();
+                        baseUri = UriBuilder.fromUri(this.baseUri).port(port).build();
 
-                        LOGGER.log(Level.INFO, "Started JettyTestContainer at the base URI " + completedBaseUri);
+                        LOGGER.log(Level.INFO, "Started JettyTestContainer at the base URI " + baseUri);
                     }
                 } catch (Exception e) {
                     throw new TestContainerException(e);

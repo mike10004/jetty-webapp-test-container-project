@@ -4,6 +4,7 @@ import io.github.mike10004.jettywebapp.testing.JettyWebappTestContainerFactory;
 import io.github.mike10004.jettywebapp.testing.WebappDeploymentContext;
 import org.glassfish.jersey.test.DeploymentContext;
 import org.glassfish.jersey.test.JerseyTest;
+import org.glassfish.jersey.test.TestProperties;
 import org.junit.ClassRule;
 import org.junit.rules.TemporaryFolder;
 
