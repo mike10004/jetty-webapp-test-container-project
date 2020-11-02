@@ -13,7 +13,6 @@ import java.io.IOException;
 @Path("forward")
 public class ForwardingResource {
 
-    @Path("forward")
     @GET
     @SuppressWarnings("VoidMethodAnnotatedWithGET")
     public void forward(@Context HttpServletRequest request, @Context HttpServletResponse response) throws ServletException, IOException {

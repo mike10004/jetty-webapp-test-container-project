@@ -14,18 +14,22 @@ import static org.junit.Assert.*;
 public class MyApplicationTest extends MyApplicationTestBase {
 
     @Test
-    public void exampleResourceBasic() {
-        Set<Integer> statusCodes = new HashSet<>();
-        for (String path : new String[]{"app/basic"}) {
-//        for (String path : new String[]{"app/basic", "app", "basic"}) {
-            WebTarget target = target().path(path);
-            System.out.format("URI = %s%n", target.getUri());
-            try (Response response = target.request().buildGet().invoke()) {
-                statusCodes.add(response.getStatus());
-            }
+    public void basic() {
+        WebTarget target = target().path("app/basic");
+        System.out.format("URI = %s%n", target.getUri());
+        try (Response response = target.request().buildGet().invoke()) {
+            assertEquals("status", 200, response.getStatus());
+            assertEquals("text", "basic", response.readEntity(String.class));
         }
-        assertTrue("has 200/OK: " + statusCodes, statusCodes.contains(200));
-//        assertEquals("http status", 200, response.getStatus());
-//        assertEquals("content", "basic", response.readEntity(String.class));
+    }
+
+    @Test
+    public void forward() {
+        WebTarget target = target().path("app/forward");
+        System.out.format("URI = %s%n", target.getUri());
+        try (Response response = target.request().buildGet().invoke()) {
+            assertEquals("status", 200, response.getStatus());
+            assertTrue("text contains right stuff", response.readEntity(String.class).contains("Forwarding Destination"));
+        }
     }
 }

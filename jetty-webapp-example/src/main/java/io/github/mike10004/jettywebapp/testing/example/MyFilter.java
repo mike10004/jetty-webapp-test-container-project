@@ -20,7 +20,7 @@ public class MyFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         try {
-            System.out.format("request context uri info: %s%n", requestContext.getUriInfo());
+            System.out.format("request context uri absolute path: %s%n", requestContext.getUriInfo().getAbsolutePath());
         } catch (Exception e) {
             // ignore
         }

@@ -10,7 +10,7 @@ import javax.ws.rs.core.Context;
 public class MyApplication extends ResourceConfig {
 
     public MyApplication(@Context ServletContext servletContext) {
-        super(BasicResource.class);
+        super(BasicResource.class, ForwardingResource.class);
         register(MyFilter.class);
         property("jersey.config.server.tracing.type", "ALL");
         property("jersey.config.server.tracing.threshold", "VERBOSE");
