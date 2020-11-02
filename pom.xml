@@ -6,7 +6,7 @@
 
     <groupId>com.github.mike10004</groupId>
     <artifactId>jetty-webapp-test-container-project</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <modules>
         <module>jetty-webapp-test-container</module>
         <module>jetty-webapp-example</module>
