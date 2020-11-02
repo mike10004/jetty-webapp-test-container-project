@@ -75,14 +75,9 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
          */
         private JettyWebappTestContainer(URI baseUri, WebappServerConfig serverOptions) throws IOException, URISyntaxException {
             String contextPath = serverOptions.contextPath();
-            final URI base = UriBuilder.fromUri(baseUri).path(contextPath).build();
-//            if (!"/".equals(base.getRawPath())) {
-//                throw new TestContainerException(String.format(
-//                        "Cannot deploy on %s. Jetty HTTP container only supports deployment on root path.",
-//                        base.getRawPath()));
-//            }
-
-            this.baseUri = base;
+            // The official test container factory throws an exception here if
+            // the context path is not "/", but I do not know why
+            this.baseUri = UriBuilder.fromUri(baseUri).path(contextPath).build();
 
             if (LOGGER.isLoggable(Level.INFO)) {
                 LOGGER.info("Creating JettyTestContainer configured at the base URI "
@@ -145,11 +140,20 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
     }
 
     @Override
-    public TestContainer create(final URI baseUri, final DeploymentContext context) throws IllegalArgumentException {
+    public TestContainer create(URI baseUri, DeploymentContext context) throws IllegalArgumentException {
+        WebappServerConfigurator configurator = getConfigurator(context);
         try {
-            return new JettyWebappTestContainer(baseUri, WebappDeploymentContext.wrap(context, applicationPath).getServerConfig());
+            return new JettyWebappTestContainer(baseUri, configurator.getServerConfig());
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    protected WebappServerConfigurator getConfigurator(DeploymentContext context) {
+        if (context instanceof WebappServerConfigurator) {
+            return (WebappServerConfigurator) context;
+        }
+        WebappDeploymentContext rebuiltContext = WebappDeploymentContext.rebuild(context, applicationPath);
+        return rebuiltContext;
     }
 }

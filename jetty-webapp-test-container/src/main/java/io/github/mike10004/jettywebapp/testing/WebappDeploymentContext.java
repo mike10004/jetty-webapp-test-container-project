@@ -2,8 +2,8 @@ package io.github.mike10004.jettywebapp.testing;
 
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.glassfish.jersey.test.DeploymentContext;
-import javax.annotation.Nullable;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.io.File;
@@ -11,12 +11,10 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
 
-public class WebappDeploymentContext extends DeploymentContext {
+public class WebappDeploymentContext extends DeploymentContext implements WebappServerConfigurator {
 
     @Nullable
     private final URI webResourceRootUri;
@@ -97,19 +95,20 @@ public class WebappDeploymentContext extends DeploymentContext {
     }
 
     /**
-     * Rebuilds a context as a {@link WebappDeploymentContext} instance, or returns the argument instance
-     * if it is already of that type.
+     * Rebuilds a generic deployment context as a {@link WebappDeploymentContext} instance,
+     * or returns the argument instance if it is already of that type.
      * @param context context
      * @param applicationPath application path; may be null if context argument is already an instance of {@link WebappDeploymentContext}
      * @return instance of class {@link WebappDeploymentContext}
      */
-    public static WebappDeploymentContext wrap(DeploymentContext context, String applicationPath) {
+    public static WebappDeploymentContext rebuild(DeploymentContext context, String applicationPath) {
         if (context instanceof WebappDeploymentContext) {
             return (WebappDeploymentContext) context;
         }
         return new Builder(context.getResourceConfig(), applicationPath).contextPath(context.getContextPath()).build();
     }
 
+    @Override
     public WebappServerConfig getServerConfig() {
         return new ContextWebappServerConfig(this);
     }
