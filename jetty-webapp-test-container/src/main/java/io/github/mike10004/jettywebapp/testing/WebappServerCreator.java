@@ -13,13 +13,16 @@ import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+/**
+ * Helper class that creates a server that acts like a normal, complete webapp running on Jetty.
+ * This is largely adapted from here: https://github.com/jetty-project/embedded-jetty-jsp
+ */
 class WebappServerCreator {
 
-    public Server createServer(URI baseUri, WebappServerConfig options) throws URISyntaxException, IOException {
+    public Server createServer(URI baseUri, WebappServerConfig options) throws IOException {
 
         Server server = JettyHttpContainerFactory.createServer(baseUri, false);
 
@@ -55,10 +58,6 @@ class WebappServerCreator {
 
     /**
      * Setup JSP Support for ServletContextHandlers.
-     * <p>
-     * NOTE: This is not required or appropriate if using a WebAppContext.
-     * </p>
-     *
      * @param servletContextHandler the ServletContextHandler to configure
      * @throws IOException if unable to configure
      */
