@@ -40,7 +40,6 @@ class WebappServerCreator {
 
         // Since this is a ServletContextHandler we must manually configure JSP support.
         enableEmbeddedJspSupport(servletContextHandler, options.jspServletConfig());
-        org.eclipse.jetty.server.Server.class.getName();
         options.addServlets(servletContextHandler);
 
         // Default Servlet (always last, always named "default")
