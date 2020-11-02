@@ -28,11 +28,20 @@ public class MyApplicationTestBase extends JerseyTest {
 
     @Override
     protected DeploymentContext configureDeployment() {
-        return WebappDeploymentContext.builder(MyApplication.class)
+        return WebappDeploymentContext.builder(getWebappClass())
                 .contextPath("/example")
                 .servletContextTempDir(servletContextTempFolder.getRoot())
                 .webResourceRootUri(getJettyWebappExampleProjectDir().resolve("src/main/webapp").toUri())
                 .build();
+    }
+
+    /**
+     * Returns the test target. Make sure this does not rely on an instance field
+     * (because it is invoked during superclass constructor).
+     * @return webapp class
+     */
+    protected Class<? extends MyApplication> getWebappClass() {
+        return MyApplication.class;
     }
 
     private static Path getJettyWebappExampleProjectDir() {

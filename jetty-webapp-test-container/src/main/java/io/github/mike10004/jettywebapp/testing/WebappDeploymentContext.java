@@ -87,9 +87,13 @@ public class WebappDeploymentContext extends DeploymentContext implements Webapp
     }
 
     private static String determineApplicationPath(Class<? extends Application> applicationClass) {
-        ApplicationPath anno = applicationClass.getAnnotation(ApplicationPath.class);
+        ApplicationPath anno = Reflections.getAnnotationFromHierarchy(applicationClass, ApplicationPath.class);
         if (anno == null) {
-            throw new IllegalArgumentException(applicationClass + " must be annotated with " + ApplicationPath.class + " to auto-detect the application path");
+            throw new IllegalArgumentException(applicationClass +
+                    " or one of its ancestors must be annotated with " +
+                    ApplicationPath.class + " to auto-detect the application " +
+                    "path; as an alternative, use a builder method that accepts " +
+                    "an explicit application path parameter");
         }
         return anno.value();
     }
