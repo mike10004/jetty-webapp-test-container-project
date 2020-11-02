@@ -14,6 +14,7 @@ public class MyApplication extends ResourceConfig {
         register(MyFilter.class);
         property("jersey.config.server.tracing.type", "ALL");
         property("jersey.config.server.tracing.threshold", "VERBOSE");
+        property("jersey.config.server.wadl.disableWadl", true);
         servletContext.getServletRegistrations().forEach((name, registration) -> {
             System.out.format("%s <- %s%n", name, registration.getMappings());
         });
