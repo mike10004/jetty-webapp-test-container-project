@@ -106,10 +106,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-      <artifactId>jersey-test-framework-provider-jetty</artifactId>
-      <version>${jersey.version}</version>
-      <scope>test</scope>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>29.0-jre</version>
     </dependency>
   </dependencies>
 

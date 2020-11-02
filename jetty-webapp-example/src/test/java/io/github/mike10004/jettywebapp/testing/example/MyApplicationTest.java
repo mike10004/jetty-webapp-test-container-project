@@ -32,4 +32,18 @@ public class MyApplicationTest extends MyApplicationTestBase {
             assertTrue("text contains right stuff", response.readEntity(String.class).contains("Forwarding Destination"));
         }
     }
+
+    @Test
+    public void root() {
+        WebTarget target = target();
+        System.out.format("URI = %s%n", target.getUri());
+        try (Response response = target.request().buildGet().invoke()) {
+            assertEquals("status", 200, response.getStatus());
+            assertEquals("content-type", "text/html", com.google.common.net.MediaType.parse(response.getHeaderString("content-type")).withoutParameters().toString());
+            String html = response.readEntity(String.class);
+            String expectedSubstring = "Hello World!";
+            assertTrue("text contains " + expectedSubstring, html.contains(expectedSubstring));
+        }
+    }
+
 }
