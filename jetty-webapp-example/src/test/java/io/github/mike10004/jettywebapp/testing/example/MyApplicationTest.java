@@ -16,7 +16,7 @@ public class MyApplicationTest extends MyApplicationTestBase {
     @Test
     public void exampleResourceBasic() {
         Set<Integer> statusCodes = new HashSet<>();
-        for (String path : new String[]{"app/foo/basic"}) {
+        for (String path : new String[]{"app/basic"}) {
 //        for (String path : new String[]{"app/basic", "app", "basic"}) {
             WebTarget target = target().path(path);
             System.out.format("URI = %s%n", target.getUri());
