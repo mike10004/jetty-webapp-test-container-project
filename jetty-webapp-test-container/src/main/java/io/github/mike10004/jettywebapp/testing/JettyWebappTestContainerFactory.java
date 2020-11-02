@@ -74,12 +74,13 @@ public class JettyWebappTestContainerFactory implements TestContainerFactory {
          * @param serverOptions
          */
         private JettyWebappTestContainer(URI baseUri, WebappServerConfig serverOptions) throws IOException, URISyntaxException {
-            final URI base = UriBuilder.fromUri(baseUri).path(serverOptions.contextPath()).build();
-            if (!"/".equals(base.getRawPath())) {
-                throw new TestContainerException(String.format(
-                        "Cannot deploy on %s. Jetty HTTP container only supports deployment on root path.",
-                        base.getRawPath()));
-            }
+            String contextPath = serverOptions.contextPath();
+            final URI base = UriBuilder.fromUri(baseUri).path(contextPath).build();
+//            if (!"/".equals(base.getRawPath())) {
+//                throw new TestContainerException(String.format(
+//                        "Cannot deploy on %s. Jetty HTTP container only supports deployment on root path.",
+//                        base.getRawPath()));
+//            }
 
             this.baseUri = base;
 

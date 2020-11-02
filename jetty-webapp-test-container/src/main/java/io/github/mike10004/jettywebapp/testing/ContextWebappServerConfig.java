@@ -64,7 +64,8 @@ class ContextWebappServerConfig implements WebappServerConfig {
 
     @Override
     public void addServlets(ServletContextHandler servletContextHandler) {
-        ServletHolder jerseyServletHolder = new ServletHolder(new ServletContainer(context.getResourceConfig()));
+        ServletContainer servletContainer = new ServletContainer(context.getResourceConfig());
+        ServletHolder jerseyServletHolder = new ServletHolder(servletContainer);
         servletContextHandler.addServlet(jerseyServletHolder, applicationPathToSpec(context.getApplicationPath()));
     }
 

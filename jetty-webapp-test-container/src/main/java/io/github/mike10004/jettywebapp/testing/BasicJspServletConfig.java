@@ -21,6 +21,7 @@ class BasicJspServletConfig implements JspServletConfig {
         this.servletContextTempDir = servletContextTempDir;
         this.pathSpecs = pathSpecs;
         this.initParams = initParams;
+        org.eclipse.jetty.apache.jsp.JuliLog.class.getName();
     }
 
     @Override
