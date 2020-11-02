@@ -6,7 +6,7 @@
 
     <groupId>com.github.mike10004</groupId>
     <artifactId>jetty-webapp-test-container-project</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
     <modules>
         <module>jetty-webapp-test-container</module>
         <module>jetty-webapp-example</module>
@@ -92,6 +92,10 @@
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.2.0</version>
+                    <configuration>
+                        <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                        <doclint>none</doclint>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
