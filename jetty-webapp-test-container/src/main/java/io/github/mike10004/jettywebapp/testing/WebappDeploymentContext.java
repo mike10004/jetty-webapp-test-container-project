@@ -183,6 +183,9 @@ public class WebappDeploymentContext extends DeploymentContext implements Webapp
 
         @Override
         public WebappDeploymentContext.Builder contextPath(String contextPath) {
+            if (contextPath != null && !contextPath.startsWith("/")) {
+                throw new IllegalArgumentException("context path must begin with /");
+            }
             super.contextPath(contextPath);
             return this;
         }
